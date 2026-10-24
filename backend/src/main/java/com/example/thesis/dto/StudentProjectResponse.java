@@ -12,6 +12,8 @@ public record StudentProjectResponse(
         boolean allCompleted,
         List<StepStatus> steps,
         List<ArtifactView> artifacts,
-        List<DesignReviewView> designReviews
+        List<WeeklyReportView> weeklyReports,
+        List<DesignReviewView> designReviews,
+        RepoBindingView repoBinding
 ) {
 }

@@ -8,9 +8,12 @@ import com.example.thesis.dto.ArtifactView;
 import com.example.thesis.dto.DesignReviewRequest;
 import com.example.thesis.dto.DesignReviewView;
 import com.example.thesis.dto.StudentProjectResponse;
+import com.example.thesis.dto.WeeklyReportReviewRequest;
+import com.example.thesis.dto.WeeklyReportView;
 import com.example.thesis.service.ArtifactService;
 import com.example.thesis.service.DesignReviewService;
 import com.example.thesis.service.ProjectProgressService;
+import com.example.thesis.service.WeeklyReportService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +21,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/advisor")
@@ -27,15 +33,18 @@ public class AdvisorController {
     private final ProjectProgressService projectProgressService;
     private final ArtifactService artifactService;
     private final DesignReviewService designReviewService;
+    private final WeeklyReportService weeklyReportService;
 
     public AdvisorController(
             ProjectProgressService projectProgressService,
             ArtifactService artifactService,
-            DesignReviewService designReviewService
+            DesignReviewService designReviewService,
+            WeeklyReportService weeklyReportService
     ) {
         this.projectProgressService = projectProgressService;
         this.artifactService = artifactService;
         this.designReviewService = designReviewService;
+        this.weeklyReportService = weeklyReportService;
     }
 
     @GetMapping("/students")
@@ -70,5 +79,24 @@ public class AdvisorController {
     ) {
         return ApiResponse.ok(designReviewService.create(
                 AuthContext.get(request).id(), projectId, reviewRequest));
+    }
+
+    @GetMapping("/weekly-reports")
+    public ApiResponse<List<WeeklyReportView>> weeklyReports(
+            @RequestParam Long projectId,
+            HttpServletRequest request
+    ) {
+        return ApiResponse.ok(weeklyReportService.listForAdvisor(
+                AuthContext.get(request).id(), projectId));
+    }
+
+    @PostMapping("/weekly-reports/{reportId}/review")
+    public ApiResponse<WeeklyReportView> reviewWeeklyReport(
+            @PathVariable Long reportId,
+            @Valid @RequestBody WeeklyReportReviewRequest reviewRequest,
+            HttpServletRequest request
+    ) {
+        return ApiResponse.ok(weeklyReportService.review(
+                AuthContext.get(request).id(), reportId, reviewRequest));
     }
 }

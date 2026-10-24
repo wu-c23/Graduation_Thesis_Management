@@ -55,6 +55,8 @@ class ArtifactAndReviewTest {
 
     @AfterEach
     void cleanUp() throws IOException {
+        jdbcTemplate.update("DELETE FROM weekly_report");
+        jdbcTemplate.update("DELETE FROM repo_binding");
         jdbcTemplate.update("DELETE FROM design_review");
         jdbcTemplate.update("DELETE FROM artifact");
         jdbcTemplate.update("DELETE FROM project WHERE id = 3");

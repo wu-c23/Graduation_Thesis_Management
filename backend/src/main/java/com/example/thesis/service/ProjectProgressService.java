@@ -4,17 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.thesis.common.ApiException;
 import com.example.thesis.dto.AdvisorStudentView;
 import com.example.thesis.dto.AdvisorStudentsResponse;
+import com.example.thesis.dto.RepoBindingView;
 import com.example.thesis.dto.StepStatus;
 import com.example.thesis.dto.StudentProjectResponse;
 import com.example.thesis.dto.UserView;
+import com.example.thesis.dto.WeeklyReportView;
 import com.example.thesis.entity.Artifact;
 import com.example.thesis.entity.DesignReview;
 import com.example.thesis.entity.Project;
 import com.example.thesis.entity.User;
+import com.example.thesis.entity.WeeklyReport;
 import com.example.thesis.mapper.ArtifactMapper;
 import com.example.thesis.mapper.DesignReviewMapper;
 import com.example.thesis.mapper.ProjectMapper;
 import com.example.thesis.mapper.UserMapper;
+import com.example.thesis.mapper.WeeklyReportMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,17 +30,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 第 3 周计算前 3 步（需求、原型、设计评审）的真实状态；
- * 周报、仓库、测试报告按计划在第 4–5 周接入，当前显示“未开始”。
+ * 计算六步进度：需求、原型、设计评审、周报、代码仓库、测试报告。
+ * 完成步数按“连续完成的前缀”统计，任一步回退都会让后续步骤暂不计入完成数。
  */
 @Service
 public class ProjectProgressService {
 
     public static final String TYPE_REQUIREMENT = "REQUIREMENT";
     public static final String TYPE_PROTOTYPE = "PROTOTYPE";
+    public static final String TYPE_TEST_REPORT = "TEST_REPORT";
 
     public static final String STATUS_COMPLETED = "COMPLETED";
     public static final String STATUS_IN_REVIEW = "IN_REVIEW";
+    public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
     public static final String STATUS_RETURNED = "RETURNED";
     public static final String STATUS_NOT_STARTED = "NOT_STARTED";
 
@@ -44,23 +50,32 @@ public class ProjectProgressService {
     private final UserMapper userMapper;
     private final ArtifactMapper artifactMapper;
     private final DesignReviewMapper designReviewMapper;
+    private final WeeklyReportMapper weeklyReportMapper;
     private final ArtifactService artifactService;
     private final DesignReviewService designReviewService;
+    private final WeeklyReportService weeklyReportService;
+    private final RepoBindingService repoBindingService;
 
     public ProjectProgressService(
             ProjectMapper projectMapper,
             UserMapper userMapper,
             ArtifactMapper artifactMapper,
             DesignReviewMapper designReviewMapper,
+            WeeklyReportMapper weeklyReportMapper,
             ArtifactService artifactService,
-            DesignReviewService designReviewService
+            DesignReviewService designReviewService,
+            WeeklyReportService weeklyReportService,
+            RepoBindingService repoBindingService
     ) {
         this.projectMapper = projectMapper;
         this.userMapper = userMapper;
         this.artifactMapper = artifactMapper;
         this.designReviewMapper = designReviewMapper;
+        this.weeklyReportMapper = weeklyReportMapper;
         this.artifactService = artifactService;
         this.designReviewService = designReviewService;
+        this.weeklyReportService = weeklyReportService;
+        this.repoBindingService = repoBindingService;
     }
 
     public StudentProjectResponse getStudentProject(Long studentId) {
@@ -94,6 +109,13 @@ public class ProjectProgressService {
         Map<Long, Long> pendingByProject = submittedArtifacts.stream()
                 .collect(Collectors.groupingBy(Artifact::getProjectId, Collectors.counting()));
 
+        List<WeeklyReport> submittedWeeklyReports = weeklyReportMapper.selectList(
+                new LambdaQueryWrapper<WeeklyReport>()
+                        .in(WeeklyReport::getProjectId, projectIds)
+                        .eq(WeeklyReport::getStatus, WeeklyReportService.STATUS_SUBMITTED));
+        Map<Long, Long> pendingWeeklyByProject = submittedWeeklyReports.stream()
+                .collect(Collectors.groupingBy(WeeklyReport::getProjectId, Collectors.counting()));
+
         List<AdvisorStudentView> views = new ArrayList<>();
         for (Project project : projects) {
             List<StepStatus> steps = buildSteps(project.getId());
@@ -115,13 +137,14 @@ public class ProjectProgressService {
                     currentStage,
                     currentStatus,
                     pendingByProject.getOrDefault(project.getId(), 0L)
+                            + pendingWeeklyByProject.getOrDefault(project.getId(), 0L)
             ));
         }
 
         return new AdvisorStudentsResponse(
                 views.size(),
                 submittedArtifacts.size(),
-                0,
+                submittedWeeklyReports.size(),
                 views
         );
     }
@@ -159,13 +182,16 @@ public class ProjectProgressService {
                 allCompleted,
                 steps,
                 artifactService.listByProject(project.getId()),
-                designReviewService.listByProject(project.getId())
+                weeklyReportService.listByProject(project.getId()),
+                designReviewService.listByProject(project.getId()),
+                repoBindingService.getForProject(project.getId())
         );
     }
 
     private List<StepStatus> buildSteps(Long projectId) {
         Artifact requirement = latestArtifact(projectId, TYPE_REQUIREMENT);
         Artifact prototype = latestArtifact(projectId, TYPE_PROTOTYPE);
+        Artifact testReport = latestArtifact(projectId, TYPE_TEST_REPORT);
         DesignReview review = latestReview(projectId);
 
         StepStatus requirementStep = artifactStep(
@@ -177,10 +203,50 @@ public class ProjectProgressService {
         steps.add(requirementStep);
         steps.add(prototypeStep);
         steps.add(reviewStep(review, requirementStep, prototypeStep));
-        steps.add(new StepStatus("WEEKLY_REPORT", "周报", STATUS_NOT_STARTED, "第 4 周开放提交与批阅"));
-        steps.add(new StepStatus("REPO_BINDING", "代码仓库", STATUS_NOT_STARTED, "第 4 周开放仓库绑定"));
-        steps.add(new StepStatus("TEST_REPORT", "测试报告", STATUS_NOT_STARTED, "第 4–5 周开放"));
+        steps.add(weeklyStep(weeklyReportService.listByProject(projectId)));
+        steps.add(repoStep(repoBindingService.getForProject(projectId)));
+        steps.add(artifactStep(TYPE_TEST_REPORT, "测试报告", testReport,
+                "提交测试报告与用例统计"));
         return steps;
+    }
+
+    private StepStatus weeklyStep(List<WeeklyReportView> reports) {
+        if (reports.isEmpty()) {
+            return new StepStatus("WEEKLY_REPORT", "周报", STATUS_NOT_STARTED,
+                    "按周提交进展，至少 1 篇经导师批阅");
+        }
+        long reviewed = reports.stream()
+                .filter(report -> WeeklyReportService.STATUS_REVIEWED.equals(report.status()))
+                .count();
+        if (reviewed > 0) {
+            return new StepStatus("WEEKLY_REPORT", "周报", STATUS_COMPLETED,
+                    "导师已批阅 " + reviewed + " 篇周报");
+        }
+        boolean waiting = reports.stream()
+                .anyMatch(report -> WeeklyReportService.STATUS_SUBMITTED.equals(report.status()));
+        if (waiting) {
+            return new StepStatus("WEEKLY_REPORT", "周报", STATUS_IN_REVIEW,
+                    "周报已提交，等待导师批阅");
+        }
+        return new StepStatus("WEEKLY_REPORT", "周报", STATUS_RETURNED,
+                "周报已退回，请修改后重新提交");
+    }
+
+    private StepStatus repoStep(RepoBindingView binding) {
+        if (binding == null) {
+            return new StepStatus("REPO_BINDING", "代码仓库", STATUS_NOT_STARTED,
+                    "绑定 GitHub / Gitee 公开仓库后可同步提交统计");
+        }
+        return switch (binding.syncStatus() == null ? "" : binding.syncStatus()) {
+            case RepoBindingService.STATUS_SUCCESS -> new StepStatus(
+                    "REPO_BINDING", "代码仓库", STATUS_COMPLETED,
+                    "已同步 " + binding.commitCount() + " 次提交");
+            case RepoBindingService.STATUS_FAILED -> new StepStatus(
+                    "REPO_BINDING", "代码仓库", STATUS_RETURNED,
+                    "自动同步失败，可重试或手工填写提交数");
+            default -> new StepStatus("REPO_BINDING", "代码仓库", STATUS_IN_PROGRESS,
+                    "仓库已绑定，等待同步");
+        };
     }
 
     private StepStatus artifactStep(String key, String title, Artifact artifact, String emptyDescription) {

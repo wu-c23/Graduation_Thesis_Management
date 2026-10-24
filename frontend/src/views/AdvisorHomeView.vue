@@ -28,7 +28,7 @@
       type="info"
       :closable="false"
       show-icon
-      title="第 3 周已开放材料审核（通过 / 退回）与设计评审（0–100 分）；周报批阅将在第 4 周开放。"
+      title="第 4 周已开放周报批阅与测试报告审核；学生绑定公开仓库后可自动同步提交统计。"
     />
 
     <el-row :gutter="16" class="stats-row">
@@ -50,7 +50,7 @@
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">待批阅周报</div>
           <div class="stat-value">{{ summary?.pendingWeeklyReportCount ?? 0 }}</div>
-          <div class="stat-hint">周报批阅第 4 周开放</div>
+          <div class="stat-hint">在周报批阅区直接处理</div>
         </el-card>
       </el-col>
     </el-row>
@@ -91,7 +91,7 @@
         v-if="!loading && students.length === 0 && !loadError"
         description="名下暂无学生"
       />
-      <p class="tab-note">导师只能查看自己名下的学生；材料与设计评审操作均会校验课题归属。</p>
+      <p class="tab-note">导师只能查看自己名下的学生；材料、周报与设计评审操作均会校验课题归属。</p>
     </el-card>
 
     <el-drawer v-model="drawerVisible" title="学生进度详情" size="760px">
@@ -129,6 +129,9 @@
               >{{ row.externalUrl }}</a>
               <span v-else>{{ row.fileName || '—' }}</span>
               <div class="muted small">{{ formatDateTime(row.submittedAt) }}</div>
+              <div v-if="row.type === 'TEST_REPORT'" class="metric-line">
+                {{ testMetricLabel(row) }}
+              </div>
             </template>
           </el-table-column>
           <el-table-column label="审核结果" width="140">
@@ -239,6 +242,82 @@
           description="暂无设计评审记录"
           :image-size="68"
         />
+
+        <el-divider content-position="left">周报批阅</el-divider>
+        <el-table :data="detail.weeklyReports" size="small" stripe>
+          <el-table-column label="周次" width="70">
+            <template #default="{ row }">第 {{ row.weekNo }} 周</template>
+          </el-table-column>
+          <el-table-column prop="content" label="本周进展" min-width="180" show-overflow-tooltip />
+          <el-table-column label="状态" width="86">
+            <template #default="{ row }">
+              <el-tag :type="weeklyStatusMeta(row.status).tag" effect="plain" size="small">
+                {{ weeklyStatusMeta(row.status).label }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="批阅意见" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.comment || '—' }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="118">
+            <template #default="{ row }">
+              <div v-if="row.status === 'SUBMITTED'" class="row-actions">
+                <el-button link type="success" @click="openWeeklyReview(row, 'REVIEWED')">
+                  批阅
+                </el-button>
+                <el-button link type="danger" @click="openWeeklyReview(row, 'RETURNED')">
+                  退回
+                </el-button>
+              </div>
+              <span v-else class="muted">—</span>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty
+          v-if="!detail.weeklyReports?.length"
+          description="学生尚未提交周报"
+          :image-size="68"
+        />
+
+        <el-divider content-position="left">代码仓库</el-divider>
+        <el-descriptions
+          v-if="detail.repoBinding"
+          :column="2"
+          border
+          size="small"
+          class="repo-info"
+        >
+          <el-descriptions-item label="仓库地址">
+            <a
+              class="link-text"
+              :href="detail.repoBinding.repoUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >{{ detail.repoBinding.repoUrl }}</a>
+          </el-descriptions-item>
+          <el-descriptions-item label="平台">
+            {{ detail.repoBinding.repoHost === 'GITEE' ? 'Gitee' : 'GitHub' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="提交数">
+            {{ detail.repoBinding.commitCount ?? 0 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="同步状态">
+            <el-tag :type="repoStatusMeta(detail.repoBinding.syncStatus).tag" effect="plain" size="small">
+              {{ repoStatusMeta(detail.repoBinding.syncStatus).label }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="最近提交">
+            {{ formatDateTime(detail.repoBinding.latestCommitAt) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="最近同步">
+            {{ formatDateTime(detail.repoBinding.lastSyncAt) }}
+          </el-descriptions-item>
+        </el-descriptions>
+        <el-empty
+          v-else
+          description="学生尚未绑定代码仓库"
+          :image-size="68"
+        />
       </template>
       <el-empty v-else description="暂无详情" />
     </el-drawer>
@@ -294,6 +373,49 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <el-dialog
+      v-model="weeklyDialog.visible"
+      :title="weeklyDialog.status === 'RETURNED' ? '退回周报' : '批阅周报'"
+      width="480px"
+      @closed="resetWeeklyReview"
+    >
+      <el-descriptions :column="1" size="small" border>
+        <el-descriptions-item label="周次">
+          第 {{ weeklyDialog.row?.weekNo }} 周
+        </el-descriptions-item>
+        <el-descriptions-item label="本周进展">
+          {{ weeklyDialog.row?.content || '—' }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <el-form label-position="top" class="review-form">
+        <el-form-item
+          :label="weeklyDialog.status === 'RETURNED' ? '退回意见（必填）' : '批阅意见（可选）'"
+          :required="weeklyDialog.status === 'RETURNED'"
+        >
+          <el-input
+            v-model="weeklyForm.comment"
+            type="textarea"
+            :rows="3"
+            maxlength="1000"
+            show-word-limit
+            :placeholder="weeklyDialog.status === 'RETURNED' ? '请说明需要补充的内容' : '可填写本周反馈'"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="weeklyDialog.visible = false">取消</el-button>
+        <el-button
+          :type="weeklyDialog.status === 'RETURNED' ? 'danger' : 'success'"
+          :loading="weeklySubmitting"
+          @click="submitWeeklyReview"
+        >
+          确认{{ weeklyDialog.status === 'RETURNED' ? '退回' : '批阅' }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -308,7 +430,9 @@ import {
   artifactStatusMeta,
   designResultMeta,
   formatDateTime,
-  stepStatusMeta
+  repoStatusMeta,
+  stepStatusMeta,
+  weeklyStatusMeta
 } from '../utils/status'
 
 const router = useRouter()
@@ -329,6 +453,10 @@ const artifactSubmitting = ref(false)
 const designForm = reactive({ score: 90, result: 'PASS', comment: '' })
 const designSubmitting = ref(false)
 
+const weeklyDialog = reactive({ visible: false, row: null, status: 'REVIEWED' })
+const weeklyForm = reactive({ comment: '' })
+const weeklySubmitting = ref(false)
+
 const students = computed(() => summary.value?.students || [])
 
 const materialsApproved = computed(() => {
@@ -345,6 +473,21 @@ function stageTagType(status) {
 function artifactSourceLabel(row) {
   if (!row) return '—'
   return row.fileName || row.externalUrl || '—'
+}
+
+function testMetricLabel(row) {
+  if (!row) return '—'
+  const parts = []
+  if (row.testCaseCount !== null && row.testCaseCount !== undefined) {
+    parts.push(`用例 ${row.testCaseCount}`)
+  }
+  if (row.testPassRate !== null && row.testPassRate !== undefined) {
+    parts.push(`通过率 ${row.testPassRate}%`)
+  }
+  if (row.defectCount !== null && row.defectCount !== undefined) {
+    parts.push(`缺陷 ${row.defectCount}`)
+  }
+  return parts.length ? parts.join(' · ') : '未填写测试统计'
 }
 
 async function loadStudents() {
@@ -454,6 +597,45 @@ async function submitDesignReview() {
   }
 }
 
+function openWeeklyReview(row, status) {
+  weeklyDialog.row = row
+  weeklyDialog.status = status
+  weeklyForm.comment = ''
+  weeklyDialog.visible = true
+}
+
+function resetWeeklyReview() {
+  weeklyDialog.row = null
+  weeklyDialog.status = 'REVIEWED'
+  weeklyForm.comment = ''
+  weeklySubmitting.value = false
+}
+
+async function submitWeeklyReview() {
+  const row = weeklyDialog.row
+  if (!row) return
+  const comment = weeklyForm.comment.trim()
+  if (weeklyDialog.status === 'RETURNED' && !comment) {
+    ElMessage.warning('退回周报时必须填写批阅意见')
+    return
+  }
+
+  weeklySubmitting.value = true
+  try {
+    await http.post(`/advisor/weekly-reports/${row.id}/review`, {
+      status: weeklyDialog.status,
+      comment
+    })
+    ElMessage.success(weeklyDialog.status === 'RETURNED' ? '周报已退回' : '周报已批阅')
+    weeklyDialog.visible = false
+    await Promise.all([refreshDetail(), loadStudents()])
+  } catch (error) {
+    ElMessage.error(error.message || '周报批阅失败')
+  } finally {
+    weeklySubmitting.value = false
+  }
+}
+
 async function handleDownload(row) {
   try {
     await downloadArtifact(row.id, row.fileName)
@@ -549,6 +731,16 @@ onMounted(loadStudents)
   color: #8a5a00;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.metric-line {
+  margin-top: 2px;
+  color: #5b6b81;
+  font-size: 12px;
+}
+
+.repo-info {
+  margin-top: 4px;
 }
 
 .row-actions {

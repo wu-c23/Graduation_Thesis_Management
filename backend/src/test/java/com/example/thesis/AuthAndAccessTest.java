@@ -40,6 +40,8 @@ class AuthAndAccessTest {
 
     @AfterEach
     void cleanUpExtraAdvisorData() {
+        jdbcTemplate.update("DELETE FROM weekly_report");
+        jdbcTemplate.update("DELETE FROM repo_binding");
         jdbcTemplate.update("DELETE FROM project WHERE id = 3");
         jdbcTemplate.update("DELETE FROM sys_user WHERE id = 4");
     }

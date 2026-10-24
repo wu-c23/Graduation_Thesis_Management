@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS artifact (
     status VARCHAR(20) NOT NULL DEFAULT 'SUBMITTED',
     score INT,
     feedback VARCHAR(1000),
+    test_case_count INT,
+    test_pass_rate INT,
+    defect_count INT,
     submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP,
     CONSTRAINT fk_artifact_project FOREIGN KEY (project_id) REFERENCES project (id)
@@ -35,6 +38,10 @@ CREATE TABLE IF NOT EXISTS artifact (
 
 -- 兼容第 2 周已创建的文件库：补充材料原始文件名
 ALTER TABLE artifact ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);
+-- 第 4 周：测试报告统计字段
+ALTER TABLE artifact ADD COLUMN IF NOT EXISTS test_case_count INT;
+ALTER TABLE artifact ADD COLUMN IF NOT EXISTS test_pass_rate INT;
+ALTER TABLE artifact ADD COLUMN IF NOT EXISTS defect_count INT;
 
 CREATE TABLE IF NOT EXISTS design_review (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -60,6 +67,10 @@ CREATE TABLE IF NOT EXISTS weekly_report (
     reviewed_at TIMESTAMP,
     CONSTRAINT fk_weekly_report_project FOREIGN KEY (project_id) REFERENCES project (id)
 );
+
+-- 同一课题每周只保留一条周报，退回后原地修改并重新提交
+CREATE UNIQUE INDEX IF NOT EXISTS uk_weekly_report_project_week
+    ON weekly_report (project_id, week_no);
 
 CREATE TABLE IF NOT EXISTS repo_binding (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

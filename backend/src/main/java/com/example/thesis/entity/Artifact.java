@@ -19,6 +19,9 @@ public class Artifact {
     private String status;
     private Integer score;
     private String feedback;
+    private Integer testCaseCount;
+    private Integer testPassRate;
+    private Integer defectCount;
     private LocalDateTime submittedAt;
     private LocalDateTime reviewedAt;
 
@@ -92,6 +95,30 @@ public class Artifact {
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
+    }
+
+    public Integer getTestCaseCount() {
+        return testCaseCount;
+    }
+
+    public void setTestCaseCount(Integer testCaseCount) {
+        this.testCaseCount = testCaseCount;
+    }
+
+    public Integer getTestPassRate() {
+        return testPassRate;
+    }
+
+    public void setTestPassRate(Integer testPassRate) {
+        this.testPassRate = testPassRate;
+    }
+
+    public Integer getDefectCount() {
+        return defectCount;
+    }
+
+    public void setDefectCount(Integer defectCount) {
+        this.defectCount = defectCount;
     }
 
     public LocalDateTime getSubmittedAt() {

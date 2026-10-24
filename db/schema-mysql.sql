@@ -37,6 +37,9 @@ CREATE TABLE IF NOT EXISTS artifact (
     status VARCHAR(20) NOT NULL DEFAULT 'SUBMITTED',
     score INT NULL,
     feedback VARCHAR(1000) NULL,
+    test_case_count INT NULL,
+    test_pass_rate INT NULL,
+    defect_count INT NULL,
     submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP NULL,
     CONSTRAINT fk_artifact_project FOREIGN KEY (project_id) REFERENCES project (id)
@@ -64,6 +67,7 @@ CREATE TABLE IF NOT EXISTS weekly_report (
     comment VARCHAR(1000) NULL,
     submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP NULL,
+    UNIQUE KEY uk_weekly_report_project_week (project_id, week_no),
     CONSTRAINT fk_weekly_report_project FOREIGN KEY (project_id) REFERENCES project (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

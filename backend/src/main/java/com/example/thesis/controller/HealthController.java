@@ -30,7 +30,7 @@ public class HealthController {
         data.put("status", "UP");
         data.put("database", "UP");
         data.put("userCount", userCount);
-        data.put("phase", "week-3-materials");
+        data.put("phase", "week-4-weekly-repo-test");
         data.put("timestamp", OffsetDateTime.now().toString());
         return ApiResponse.ok(data);
     }

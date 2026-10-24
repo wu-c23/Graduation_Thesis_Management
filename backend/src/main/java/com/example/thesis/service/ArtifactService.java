@@ -45,7 +45,8 @@ public class ArtifactService {
     public static final String STATUS_APPROVED = "APPROVED";
     public static final String STATUS_RETURNED = "RETURNED";
 
-    private static final Set<String> SUBMITTABLE_TYPES = Set.of(TYPE_REQUIREMENT, TYPE_PROTOTYPE);
+    private static final Set<String> SUBMITTABLE_TYPES =
+            Set.of(TYPE_REQUIREMENT, TYPE_PROTOTYPE, TYPE_TEST_REPORT);
     private static final Set<String> ALLOWED_EXTENSIONS =
             Set.of("pdf", "docx", "zip", "png", "jpg", "jpeg");
     private static final int MAX_NAME_LENGTH = 200;
@@ -87,9 +88,18 @@ public class ArtifactService {
      * 文件上传与外链提交二选一；每次提交插入新记录，旧记录保留形成历史。
      */
     @Transactional
-    public ArtifactView submit(Long studentId, String type, String externalUrl, MultipartFile file) {
+    public ArtifactView submit(
+            Long studentId,
+            String type,
+            String externalUrl,
+            MultipartFile file,
+            Integer testCaseCount,
+            Integer testPassRate,
+            Integer defectCount
+    ) {
         Project project = requireStudentProject(studentId);
         String normalizedType = normalizeType(type);
+        validateTestMetrics(normalizedType, testCaseCount, testPassRate, defectCount);
 
         Artifact latest = latestArtifact(project.getId(), normalizedType);
         if (latest != null && STATUS_SUBMITTED.equals(latest.getStatus())) {
@@ -128,6 +138,11 @@ public class ArtifactService {
         artifact.setFileName(fileName);
         artifact.setExternalUrl(url);
         artifact.setStatus(STATUS_SUBMITTED);
+        if (TYPE_TEST_REPORT.equals(normalizedType)) {
+            artifact.setTestCaseCount(testCaseCount);
+            artifact.setTestPassRate(testPassRate);
+            artifact.setDefectCount(defectCount);
+        }
         artifact.setSubmittedAt(LocalDateTime.now());
 
         try {
@@ -246,13 +261,34 @@ public class ArtifactService {
             throw ApiException.badRequest("材料类型不能为空");
         }
         String normalized = type.trim().toUpperCase(Locale.ROOT);
-        if (TYPE_TEST_REPORT.equals(normalized)) {
-            throw ApiException.badRequest("测试报告将在第 4–5 周开放");
-        }
         if (!SUBMITTABLE_TYPES.contains(normalized)) {
             throw ApiException.badRequest("不支持的材料类型");
         }
         return normalized;
+    }
+
+    private void validateTestMetrics(
+            String type,
+            Integer testCaseCount,
+            Integer testPassRate,
+            Integer defectCount
+    ) {
+        boolean hasMetrics = testCaseCount != null || testPassRate != null || defectCount != null;
+        if (!TYPE_TEST_REPORT.equals(type)) {
+            if (hasMetrics) {
+                throw ApiException.badRequest("只有测试报告可以填写测试统计");
+            }
+            return;
+        }
+        if (testCaseCount != null && testCaseCount < 0) {
+            throw ApiException.badRequest("用例数不能小于 0");
+        }
+        if (testPassRate != null && (testPassRate < 0 || testPassRate > 100)) {
+            throw ApiException.badRequest("通过率必须在 0–100 之间");
+        }
+        if (defectCount != null && defectCount < 0) {
+            throw ApiException.badRequest("缺陷数不能小于 0");
+        }
     }
 
     private void validateExternalUrl(String url) {

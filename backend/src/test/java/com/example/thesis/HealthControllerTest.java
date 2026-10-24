@@ -27,6 +27,6 @@ class HealthControllerTest {
                 .andExpect(jsonPath("$.data.status").value("UP"))
                 .andExpect(jsonPath("$.data.database").value("UP"))
                 .andExpect(jsonPath("$.data.userCount").value(3))
-                .andExpect(jsonPath("$.data.phase").value("week-3-materials"));
+                .andExpect(jsonPath("$.data.phase").value("week-4-weekly-repo-test"));
     }
 }

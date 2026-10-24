@@ -18,6 +18,9 @@ public record ArtifactView(
         String status,
         Integer score,
         String feedback,
+        Integer testCaseCount,
+        Integer testPassRate,
+        Integer defectCount,
         LocalDateTime submittedAt,
         LocalDateTime reviewedAt,
         boolean downloadable
@@ -40,6 +43,9 @@ public record ArtifactView(
                 artifact.getStatus(),
                 artifact.getScore(),
                 artifact.getFeedback(),
+                artifact.getTestCaseCount(),
+                artifact.getTestPassRate(),
+                artifact.getDefectCount(),
                 artifact.getSubmittedAt(),
                 artifact.getReviewedAt(),
                 artifact.getFilePath() != null && !artifact.getFilePath().isBlank()
