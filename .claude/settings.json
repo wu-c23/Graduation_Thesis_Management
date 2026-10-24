@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/auto-push.sh\"",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/auto-push.sh\"",
             "timeout": 120,
             "statusMessage": "自动同步到 GitHub..."
           }
