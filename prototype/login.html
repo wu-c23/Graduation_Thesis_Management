@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 登录页 · 表单不提交真实数据</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a class="active" href="login.html">登录</a>
+        <a href="student-workbench.html">学生工作台</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="login-wrap">
+    <section class="login-intro">
+      <span class="tag" style="background:#1d4ed8;color:#dbeafe;">毕业设计 · 全过程</span>
+      <h1>把每一步<br />都留在系统里</h1>
+      <p>需求文档、原型、设计评审、周报、代码仓库、测试报告，一条主线完成学生与导师的协作。</p>
+      <div class="flow-line" style="margin-top: 26px;">
+        <span style="background:transparent;border-color:#60a5fa;color:#eff6ff;">学生</span>
+        <i style="color:#93c5fd;">/</i>
+        <span style="background:transparent;border-color:#60a5fa;color:#eff6ff;">导师</span>
+        <i style="color:#93c5fd;">/</i>
+        <span style="background:transparent;border-color:#60a5fa;color:#eff6ff;">管理员（种子数据）</span>
+      </div>
+    </section>
+
+    <section class="login-form">
+      <h2>账号登录</h2>
+      <p class="muted">使用演示账号进入对应角色</p>
+      <div class="form-grid" style="margin-top: 24px;">
+        <div class="field">
+          <label>用户名</label>
+          <input value="stu001" />
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <input type="password" value="123456" />
+        </div>
+        <a class="btn primary block" href="student-workbench.html">登录</a>
+      </div>
+      <div class="note" style="margin-top: 18px;">
+        演示账号：stu001 / 123456（学生）<br />
+        tea001 / 123456（导师）
+      </div>
+      <p class="muted" style="margin-top: 18px;">
+        第 1 周为页面骨架，真实 JWT 登录在第 2 周接入。
+      </p>
+      <p><a href="advisor-students.html">以导师身份预览 →</a></p>
+    </section>
+  </main>
+</body>
+</html>

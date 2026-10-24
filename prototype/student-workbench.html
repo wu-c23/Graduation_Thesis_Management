@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学生工作台 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 学生工作台 · 演示数据</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a class="active" href="student-workbench.html">学生工作台</a>
+        <a href="material.html">材料</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="repo.html">仓库</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>学生工作台</h1>
+        <p class="muted">张同学 · 基于 Spring Boot 的图书管理系统 · 导师：王老师</p>
+      </div>
+      <div class="stack">
+        <span class="tag pending">需求文档待修改</span>
+        <a class="btn" href="login.html">退出</a>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>六阶段进度</h2>
+        <span class="tag info">当前：设计评审前</span>
+      </div>
+      <div class="steps">
+        <div class="step active"><span class="num">1</span><br />需求文档<br /><span class="tag return">已退回</span></div>
+        <div class="step"><span class="num">2</span><br />原型<br /><span class="tag">待提交</span></div>
+        <div class="step"><span class="num">3</span><br />设计评审<br /><span class="tag">未开始</span></div>
+        <div class="step"><span class="num">4</span><br />周报<br /><span class="tag">0 篇</span></div>
+        <div class="step"><span class="num">5</span><br />代码仓库<br /><span class="tag">未绑定</span></div>
+        <div class="step"><span class="num">6</span><br />测试报告<br /><span class="tag">未提交</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <nav class="tabs">
+        <a class="active" href="material.html">材料提交</a>
+        <a href="design-review.html">设计评审</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="repo.html">代码仓库</a>
+        <a href="test-report.html">测试报告</a>
+      </nav>
+
+      <div class="layout-two">
+        <div>
+          <h2>当前待办</h2>
+          <div class="form-grid">
+            <div class="note warn-note">
+              <strong>需求文档已被退回</strong><br />
+              导师意见：请补充非功能需求与核心状态说明，并明确“退回重交”的规则。
+            </div>
+            <div class="note">
+              <strong>下一步</strong><br />
+              修改需求文档并重新提交；通过后上传原型，方可进入设计评审。
+            </div>
+          </div>
+        </div>
+        <div>
+          <h2>最近动态</h2>
+          <table>
+            <tr><th>时间</th><th>事件</th></tr>
+            <tr><td>10/23 20:10</td><td>导师退回需求文档</td></tr>
+            <tr><td>10/22 19:40</td><td>提交需求文档 v1</td></tr>
+            <tr><td>10/20 10:00</td><td>课题绑定成功</td></tr>
+          </table>
+        </div>
+      </div>
+      <p class="muted" style="margin-top: 16px;">说明：学生只能看到自己的项目、材料、周报和仓库。</p>
+    </section>
+  </main>
+</body>
+</html>

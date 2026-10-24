@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>材料提交 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 材料提交 · 静态表单</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a href="student-workbench.html">学生工作台</a>
+        <a class="active" href="material.html">材料</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="repo.html">仓库</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>材料提交</h1>
+        <p class="muted">张同学 · 基于 Spring Boot 的图书管理系统 · 需求文档 / 原型</p>
+      </div>
+      <span class="tag return">需求文档已退回</span>
+    </div>
+
+    <section class="card">
+      <nav class="tabs">
+        <a class="active" href="material.html">材料提交</a>
+        <a href="design-review.html">设计评审</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="repo.html">代码仓库</a>
+        <a href="test-report.html">测试报告</a>
+      </nav>
+
+      <table>
+        <tr>
+          <th>材料类型</th>
+          <th>当前版本</th>
+          <th>状态</th>
+          <th>最近更新</th>
+          <th>操作</th>
+        </tr>
+        <tr>
+          <td>需求文档</td>
+          <td>v2</td>
+          <td><span class="tag return">已退回</span></td>
+          <td>10/23 20:10</td>
+          <td><a href="#upload">重新提交</a></td>
+        </tr>
+        <tr>
+          <td>原型</td>
+          <td>—</td>
+          <td><span class="tag">待提交</span></td>
+          <td>—</td>
+          <td><a href="#upload">提交</a></td>
+        </tr>
+      </table>
+    </section>
+
+    <div class="layout-two">
+      <section class="card" id="upload">
+        <h2>上传材料</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>材料类型</label>
+            <select>
+              <option>需求文档</option>
+              <option>原型</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>上传文件（PDF / DOCX / ZIP / 图片，≤20MB）</label>
+            <input type="file" />
+          </div>
+          <div class="field">
+            <label>或填写外部链接（Axure / Figma / 墨刀 / 在线文档）</label>
+            <input placeholder="https://..." />
+          </div>
+          <div class="field">
+            <label>本次修改说明</label>
+            <textarea placeholder="例如：补充了非功能需求和“退回重交”的状态规则。"></textarea>
+          </div>
+          <button class="btn primary">提交（原型静态按钮）</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>导师反馈</h2>
+        <div class="note warn-note">
+          <strong>退回 · 王老师 · 10/23 20:10</strong><br />
+          请补充非功能需求与核心状态说明，并明确“退回重交”的规则。补充后重新提交即可。
+        </div>
+        <h3 style="margin-top: 18px;">提交历史</h3>
+        <table>
+          <tr><th>版本</th><th>时间</th><th>状态</th></tr>
+          <tr><td>v2</td><td>10/23 19:30</td><td><span class="tag return">退回</span></td></tr>
+          <tr><td>v1</td><td>10/22 19:40</td><td><span class="tag return">退回</span></td></tr>
+        </table>
+        <p class="muted" style="margin-top: 14px;">每次提交新增一条记录，旧版本只读，形成可追溯历史。</p>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="note">
+        需求文档和原型都通过后，才能进入设计评审。第 3 周实现真实上传、退回重交与历史记录。
+      </div>
+      <p style="margin-bottom: 0;"><a href="student-workbench.html">← 返回学生工作台</a></p>
+    </section>
+  </main>
+</body>
+</html>

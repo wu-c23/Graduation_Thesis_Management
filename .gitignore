@@ -1,0 +1,30 @@
+# Java / Maven
+backend/target/
+*.class
+*.log
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# H2 development database
+backend/data/
+data/
+*.mv.db
+*.trace.db
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Local environment
+.env
+*.local
+.tmp-bcrypt/

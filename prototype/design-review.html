@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>设计评审 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 设计评审（导师视角）· 静态展示</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a href="advisor-students.html">导师学生列表</a>
+        <a class="active" href="design-review.html">设计评审</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="test-report.html">测试报告</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>设计评审</h1>
+        <p class="muted">张同学 · 基于 Spring Boot 的图书管理系统 · 当前评审轮次：第 1 轮</p>
+      </div>
+      <a class="btn" href="advisor-students.html">← 返回学生列表</a>
+    </div>
+
+    <div class="layout-two">
+      <section class="card">
+        <h2>待评审材料</h2>
+        <table>
+          <tr><th>材料</th><th>版本</th><th>状态</th><th>查看</th></tr>
+          <tr>
+            <td>需求文档</td>
+            <td>v2</td>
+            <td><span class="tag ok">已通过</span></td>
+            <td><a href="#">打开文件</a></td>
+          </tr>
+          <tr>
+            <td>原型</td>
+            <td>v1</td>
+            <td><span class="tag ok">已通过</span></td>
+            <td><a href="#">打开原型链接</a></td>
+          </tr>
+        </table>
+        <div class="note" style="margin-top: 16px;">
+          评审前置条件：需求文档和原型均通过。当前两项均已通过，可以提交设计评审结论。
+        </div>
+        <h3 style="margin-top: 20px;">上一轮记录</h3>
+        <p class="muted">暂无上一轮记录，本轮为首次设计评审。</p>
+      </section>
+
+      <section class="card">
+        <h2>评审结论</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>评分（0–100）</label>
+            <input value="86" />
+          </div>
+          <div class="field">
+            <label>评语</label>
+            <textarea>需求边界清楚，原型覆盖了核心流程。建议补充异常场景（文件上传失败、退回后重交）的页面说明。</textarea>
+          </div>
+          <div class="stack">
+            <button class="btn primary">通过</button>
+            <button class="btn danger">退回修改</button>
+          </div>
+        </div>
+        <div class="note" style="margin-top: 16px;">
+          退回后学生修改材料，可再次提交评审；系统保留每次评审的分数、评语和轮次。
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>评审记录</h2>
+      <table>
+        <tr><th>轮次</th><th>评审人</th><th>评分</th><th>结论</th><th>时间</th></tr>
+        <tr><td colspan="5" class="muted">暂无记录</td></tr>
+      </table>
+      <div class="footer-note">第 3 周实现真实评分、评语、通过/退回与复审闭环。</div>
+    </section>
+  </main>
+</body>
+</html>

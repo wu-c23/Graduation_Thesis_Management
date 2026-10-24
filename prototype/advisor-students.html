@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>导师学生列表 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 导师工作台 · 演示数据</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a class="active" href="advisor-students.html">导师学生列表</a>
+        <a href="design-review.html">设计评审</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="test-report.html">测试报告</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>导师工作台</h1>
+        <p class="muted">王老师 · 名下 2 名学生 · 数据为静态示例</p>
+      </div>
+      <a class="btn" href="login.html">退出</a>
+    </div>
+
+    <section class="metric-grid">
+      <div class="metric"><span>名下学生</span><strong>2</strong></div>
+      <div class="metric"><span>待审核材料</span><strong>2</strong></div>
+      <div class="metric"><span>待批阅周报</span><strong>1</strong></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>学生进度</h2>
+        <span class="tag info">按当前阶段排序</span>
+      </div>
+      <table>
+        <tr>
+          <th>学生</th>
+          <th>学号</th>
+          <th>课题</th>
+          <th>当前阶段</th>
+          <th>待处理</th>
+          <th>最近动态</th>
+          <th>操作</th>
+        </tr>
+        <tr>
+          <td>张同学</td>
+          <td>stu001</td>
+          <td>基于 Spring Boot 的图书管理系统</td>
+          <td><span class="tag pending">设计评审</span></td>
+          <td>1 份材料</td>
+          <td>10/23 提交原型</td>
+          <td><a href="design-review.html">评审</a></td>
+        </tr>
+        <tr>
+          <td>李同学</td>
+          <td>stu002</td>
+          <td>校园二手交易平台</td>
+          <td><span class="tag info">需求文档</span></td>
+          <td>1 份材料</td>
+          <td>10/22 提交需求文档</td>
+          <td><a href="design-review.html">查看</a></td>
+        </tr>
+      </table>
+      <p class="muted" style="margin-top: 14px;">
+        导师只能看到自己名下的学生；学生不能访问导师接口。第 2 周接入真实登录与数据。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>待处理事项</h2>
+      <div class="form-grid">
+        <div class="note warn-note"><strong>张同学 · 原型待审核</strong><br />提交时间：10/23 19:30 · <a href="design-review.html">去评审</a></div>
+        <div class="note"><strong>李同学 · 需求文档待审核</strong><br />提交时间：10/22 20:12 · <a href="design-review.html">去查看</a></div>
+      </div>
+      <p class="muted" style="margin-top: 14px;">第 3 周实现材料审核与设计评审；第 4 周加入周报批阅。</p>
+    </section>
+  </main>
+</body>
+</html>

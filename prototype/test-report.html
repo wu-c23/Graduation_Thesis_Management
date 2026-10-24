@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>测试报告 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 测试报告 · 静态展示</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a href="student-workbench.html">学生工作台</a>
+        <a href="repo.html">仓库</a>
+        <a class="active" href="test-report.html">测试报告</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>测试报告</h1>
+        <p class="muted">张同学 · 基于 Spring Boot 的图书管理系统 · 最后一个阶段</p>
+      </div>
+      <span class="tag pending">待提交</span>
+    </div>
+
+    <section class="card">
+      <nav class="tabs">
+        <a href="material.html">材料提交</a>
+        <a href="design-review.html">设计评审</a>
+        <a href="weekly-report.html">周报</a>
+        <a href="repo.html">代码仓库</a>
+        <a class="active" href="test-report.html">测试报告</a>
+      </nav>
+
+      <div class="layout-two">
+        <div>
+          <h2>提交测试报告</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label>测试用例数</label>
+              <input placeholder="例如：32" />
+            </div>
+            <div class="field">
+              <label>通过率（%）</label>
+              <input placeholder="例如：93.75" />
+            </div>
+            <div class="field">
+              <label>未关闭缺陷数</label>
+              <input placeholder="例如：2" />
+            </div>
+            <div class="field">
+              <label>报告附件（PDF / DOCX / ZIP）</label>
+              <input type="file" />
+            </div>
+            <button class="btn primary">提交（静态按钮）</button>
+          </div>
+        </div>
+
+        <div>
+          <h2>导师审核</h2>
+          <div class="note">
+            审核前置：需求文档、原型、设计评审、周报、代码仓库均已完成或可查看。
+          </div>
+          <div class="form-grid" style="margin-top: 14px;">
+            <div class="field">
+              <label>审核意见</label>
+              <textarea placeholder="导师填写审核意见"></textarea>
+            </div>
+            <div class="stack">
+              <button class="btn primary">通过</button>
+              <button class="btn danger">退回修改</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>提交历史</h2>
+      <table>
+        <tr><th>版本</th><th>用例数</th><th>通过率</th><th>缺陷数</th><th>状态</th></tr>
+        <tr><td colspan="5" class="muted">暂无提交记录</td></tr>
+      </table>
+      <div class="note" style="margin-top: 16px;">
+        测试报告通过后，六步进度全部完成，进入结题归档。
+      </div>
+      <p style="margin-bottom: 0;"><a href="student-workbench.html">← 返回学生工作台</a></p>
+    </section>
+  </main>
+</body>
+</html>

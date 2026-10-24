@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>周报 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 周报提交与批阅 · 静态展示</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a href="student-workbench.html">学生工作台</a>
+        <a href="material.html">材料</a>
+        <a class="active" href="weekly-report.html">周报</a>
+        <a href="repo.html">仓库</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>周报</h1>
+        <p class="muted">张同学 · 基于 Spring Boot 的图书管理系统 · 本周为第 4 周</p>
+      </div>
+      <span class="tag info">已提交 2 篇</span>
+    </div>
+
+    <section class="card">
+      <nav class="tabs">
+        <a href="material.html">材料提交</a>
+        <a href="design-review.html">设计评审</a>
+        <a class="active" href="weekly-report.html">周报</a>
+        <a href="repo.html">代码仓库</a>
+        <a href="test-report.html">测试报告</a>
+      </nav>
+
+      <div class="layout-two">
+        <div>
+          <h2>提交本周周报</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label>周次</label>
+              <select>
+                <option>第 4 周（10/26–11/01）</option>
+                <option>第 3 周（10/19–10/25）</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>本周进展</label>
+              <textarea>完成需求文档 v2 和原型 v1，原型已通过导师审核；开始设计评审。</textarea>
+            </div>
+            <div class="field">
+              <label>遇到的问题</label>
+              <textarea>文件上传的异常场景还没有设计；仓库同步 API 的限流规则需要确认。</textarea>
+            </div>
+            <div class="field">
+              <label>下周计划</label>
+              <textarea>完成设计评审整改；绑定代码仓库并同步提交记录。</textarea>
+            </div>
+            <button class="btn primary">提交周报（静态按钮）</button>
+          </div>
+        </div>
+
+        <div>
+          <h2>导师批阅</h2>
+          <div class="note">
+            <strong>第 3 周周报 · 已批阅</strong><br />
+            进展符合计划。请把设计评审中的异常场景补充到原型中，并在下周周报中说明仓库同步结果。
+          </div>
+          <h3 style="margin-top: 18px;">历史周报</h3>
+          <table>
+            <tr><th>周次</th><th>状态</th><th>批阅</th></tr>
+            <tr><td>第 3 周</td><td><span class="tag ok">已批阅</span></td><td>已查看</td></tr>
+            <tr><td>第 2 周</td><td><span class="tag ok">已批阅</span></td><td>已查看</td></tr>
+          </table>
+          <p class="muted" style="margin-top: 14px;">周报是持续性活动，进度页显示提交篇数和最近批阅状态。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="note">第 4 周实现周报提交、导师批阅和状态列表；不开发评论回复与通知。</div>
+      <p style="margin-bottom: 0;"><a href="repo.html">下一步：关联代码仓库 →</a></p>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>代码仓库 · 低保真原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">低保真原型 · 代码仓库关联 · 静态展示</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a href="index.html">原型首页</a>
+        <a href="student-workbench.html">学生工作台</a>
+        <a href="material.html">材料</a>
+        <a href="weekly-report.html">周报</a>
+        <a class="active" href="repo.html">仓库</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>代码仓库</h1>
+        <p class="muted">张同学 · 绑定公开 GitHub / Gitee 仓库并同步提交记录</p>
+      </div>
+      <span class="tag ok">已绑定</span>
+    </div>
+
+    <section class="card">
+      <nav class="tabs">
+        <a href="material.html">材料提交</a>
+        <a href="design-review.html">设计评审</a>
+        <a href="weekly-report.html">周报</a>
+        <a class="active" href="repo.html">代码仓库</a>
+        <a href="test-report.html">测试报告</a>
+      </nav>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>公开仓库地址</label>
+          <input value="https://github.com/stu001/thesis-book-system" />
+        </div>
+        <div class="stack">
+          <button class="btn primary">保存并同步（静态按钮）</button>
+          <button class="btn">手动填写 commit 数</button>
+        </div>
+      </div>
+      <div class="note warn-note" style="margin-top: 14px;">
+        只支持公开仓库，不做 OAuth 和 Token 存储。若 API 超时或限流，可手工填写 commit 数继续演示。
+      </div>
+    </section>
+
+    <section class="metric-grid">
+      <div class="metric"><span>提交总数</span><strong>37</strong></div>
+      <div class="metric"><span>最近提交</span><strong style="font-size:16px;">10/24 21:18</strong></div>
+      <div class="metric"><span>最近同步</span><strong style="font-size:16px;">10/24 21:20</strong></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>最近提交</h2>
+        <span class="tag info">同步成功</span>
+      </div>
+      <table>
+        <tr><th>Commit</th><th>说明</th><th>作者</th><th>时间</th></tr>
+        <tr><td>a31f9c2</td><td>feat: 完成需求文档上传与退回重交</td><td>stu001</td><td>10/24 21:18</td></tr>
+        <tr><td>7d0b4ee</td><td>feat: 学生工作台六阶段进度</td><td>stu001</td><td>10/23 18:42</td></tr>
+        <tr><td>2c8e115</td><td>chore: 初始化前后端脚手架</td><td>stu001</td><td>10/21 20:05</td></tr>
+      </table>
+      <p class="muted" style="margin-top: 14px;">第 4 周实现手动同步、commit 统计和失败兜底；定时同步与 Webhook 不做。</p>
+    </section>
+
+    <section class="card">
+      <p style="margin: 0;"><a href="test-report.html">下一步：提交测试报告 →</a></p>
+    </section>
+  </main>
+</body>
+</html>

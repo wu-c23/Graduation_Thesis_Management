@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>低保真原型 · 毕业论文过程管理平台</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="prototype-banner">第 1 周交付物 · 低保真交互原型 · 静态页面，按钮不提交真实数据</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">毕设过程管理平台 · 原型</div>
+      <nav class="nav-links">
+        <a class="active" href="index.html">原型首页</a>
+        <a href="student-workbench.html">学生工作台</a>
+        <a href="advisor-students.html">导师视图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>低保真交互原型</h1>
+        <p class="muted">对应需求文档 v0.1 · 覆盖学生与导师的核心流程 · 共 8 个页面</p>
+      </div>
+      <span class="tag info">Week 1 / 6</span>
+    </div>
+
+    <section class="card">
+      <h2>六步主线</h2>
+      <div class="flow-line">
+        <span>需求文档</span><i>→</i>
+        <span>原型</span><i>→</i>
+        <span>设计评审</span><i>→</i>
+        <span>周报</span><i>→</i>
+        <span>代码仓库</span><i>→</i>
+        <span>测试报告</span>
+      </div>
+      <p class="muted" style="margin-top: 12px;">
+        点击下方卡片进入对应页面。页面之间的蓝色导航与按钮用于表达跳转关系；
+        所有表单和审核按钮均为静态展示，真实交互在第 2–4 周实现。
+      </p>
+    </section>
+
+    <section class="gallery">
+      <a href="login.html">
+        <h3>01 登录页</h3>
+        <p>账号密码、演示账号提示、角色说明。</p>
+      </a>
+      <a href="student-workbench.html">
+        <h3>02 学生工作台</h3>
+        <p>六阶段进度、当前待办、最近反馈。</p>
+      </a>
+      <a href="material.html">
+        <h3>03 材料提交</h3>
+        <p>需求文档 / 原型上传、外链、退回重交与历史。</p>
+      </a>
+      <a href="design-review.html">
+        <h3>04 设计评审</h3>
+        <p>导师查看材料、评分、评语、通过或退回。</p>
+      </a>
+      <a href="weekly-report.html">
+        <h3>05 周报</h3>
+        <p>学生按周提交进展，导师批阅并填写评语。</p>
+      </a>
+      <a href="repo.html">
+        <h3>06 代码仓库</h3>
+        <p>绑定公开仓库、同步 commit、失败时手工兜底。</p>
+      </a>
+      <a href="test-report.html">
+        <h3>07 测试报告</h3>
+        <p>用例数、通过率、缺陷数与附件，导师审核。</p>
+      </a>
+      <a href="advisor-students.html">
+        <h3>08 导师学生列表</h3>
+        <p>名下学生、当前阶段、待处理数量与详情入口。</p>
+      </a>
+    </section>
+
+    <section class="card" style="margin-top: 18px;">
+      <h2>原型说明</h2>
+      <div class="layout-two">
+        <div>
+          <h3>这一版解决什么</h3>
+          <p class="muted">
+            先把六步流程、角色边界和页面信息结构确认下来，避免直接写代码后返工。
+            低保真原型不追求视觉细节，只验证“谁在什么状态下看到什么、能做什么”。
+          </p>
+        </div>
+        <div>
+          <h3>下一版会补充</h3>
+          <p class="muted">
+            在真实登录、文件上传、审核状态和仓库同步接入后，用真实数据替换静态示例；
+            同时补充错误态、空状态和退回后的重交路径。
+          </p>
+        </div>
+      </div>
+      <div class="footer-note">文件位置：prototype/index.html · 直接用浏览器打开即可浏览</div>
+    </section>
+  </main>
+</body>
+</html>
