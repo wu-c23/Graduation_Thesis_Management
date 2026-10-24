@@ -5,6 +5,31 @@ export const STEP_STATUS_META = {
   NOT_STARTED: { label: '未开始', tag: 'info' }
 }
 
+export const ARTIFACT_STATUS_META = {
+  SUBMITTED: { label: '待审核', tag: 'warning' },
+  APPROVED: { label: '已通过', tag: 'success' },
+  RETURNED: { label: '已退回', tag: 'danger' },
+  NOT_STARTED: { label: '未提交', tag: 'info' }
+}
+
+export const DESIGN_RESULT_META = {
+  PASS: { label: '通过', tag: 'success' },
+  RETURN: { label: '退回', tag: 'danger' }
+}
+
 export function stepStatusMeta(status) {
   return STEP_STATUS_META[status] || STEP_STATUS_META.NOT_STARTED
+}
+
+export function artifactStatusMeta(status) {
+  return ARTIFACT_STATUS_META[status] || ARTIFACT_STATUS_META.NOT_STARTED
+}
+
+export function designResultMeta(result) {
+  return DESIGN_RESULT_META[result] || { label: result || '—', tag: 'info' }
+}
+
+export function formatDateTime(value) {
+  if (!value) return '—'
+  return String(value).replace('T', ' ').slice(0, 16)
 }

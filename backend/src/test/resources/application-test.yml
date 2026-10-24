@@ -11,3 +11,9 @@ spring:
   h2:
     console:
       enabled: false
+
+app:
+  upload:
+    dir: ./target/test-uploads
+    # 测试环境使用较小上限，避免创建 20MB 文件
+    max-size-bytes: 1024

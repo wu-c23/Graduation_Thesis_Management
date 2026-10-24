@@ -26,8 +26,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 第 2 周只计算前 3 步（需求、原型、设计评审）的真实状态；
- * 周报、仓库、测试报告按计划在第 4 周接入，当前显示“未开始”。
+ * 第 3 周计算前 3 步（需求、原型、设计评审）的真实状态；
+ * 周报、仓库、测试报告按计划在第 4–5 周接入，当前显示“未开始”。
  */
 @Service
 public class ProjectProgressService {
@@ -44,17 +44,23 @@ public class ProjectProgressService {
     private final UserMapper userMapper;
     private final ArtifactMapper artifactMapper;
     private final DesignReviewMapper designReviewMapper;
+    private final ArtifactService artifactService;
+    private final DesignReviewService designReviewService;
 
     public ProjectProgressService(
             ProjectMapper projectMapper,
             UserMapper userMapper,
             ArtifactMapper artifactMapper,
-            DesignReviewMapper designReviewMapper
+            DesignReviewMapper designReviewMapper,
+            ArtifactService artifactService,
+            DesignReviewService designReviewService
     ) {
         this.projectMapper = projectMapper;
         this.userMapper = userMapper;
         this.artifactMapper = artifactMapper;
         this.designReviewMapper = designReviewMapper;
+        this.artifactService = artifactService;
+        this.designReviewService = designReviewService;
     }
 
     public StudentProjectResponse getStudentProject(Long studentId) {
@@ -151,7 +157,9 @@ public class ProjectProgressService {
                 completed,
                 current,
                 allCompleted,
-                steps
+                steps,
+                artifactService.listByProject(project.getId()),
+                designReviewService.listByProject(project.getId())
         );
     }
 
@@ -161,9 +169,9 @@ public class ProjectProgressService {
         DesignReview review = latestReview(projectId);
 
         StepStatus requirementStep = artifactStep(
-                TYPE_REQUIREMENT, "需求文档", requirement, "待提交（第 3 周开放）");
+                TYPE_REQUIREMENT, "需求文档", requirement, "待提交");
         StepStatus prototypeStep = artifactStep(
-                TYPE_PROTOTYPE, "原型", prototype, "待提交（第 3 周开放）");
+                TYPE_PROTOTYPE, "原型", prototype, "待提交");
 
         List<StepStatus> steps = new ArrayList<>();
         steps.add(requirementStep);
@@ -188,17 +196,27 @@ public class ProjectProgressService {
     }
 
     private StepStatus reviewStep(DesignReview review, StepStatus requirement, StepStatus prototype) {
-        if (review != null) {
-            String score = review.getScore() == null ? "" : "（" + review.getScore() + " 分）";
-            if ("PASS".equals(review.getResult())) {
-                return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_COMPLETED, "评审通过" + score);
+        boolean materialsReady = STATUS_COMPLETED.equals(requirement.status())
+                && STATUS_COMPLETED.equals(prototype.status());
+        String score = review == null || review.getScore() == null ? "" : "（" + review.getScore() + " 分）";
+
+        // 材料被重新提交后，旧评审不再视为当前步骤的完成依据。
+        if (!materialsReady) {
+            if (review != null && "RETURN".equals(review.getResult())) {
+                return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_RETURNED,
+                        "评审退回，请修改材料后重新提交");
             }
-            return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_RETURNED, "评审退回，请修改后重新评审");
+            return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_NOT_STARTED,
+                    "需求与原型通过后可评审");
         }
-        if (!STATUS_COMPLETED.equals(requirement.status()) || !STATUS_COMPLETED.equals(prototype.status())) {
-            return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_NOT_STARTED, "需求与原型通过后可评审");
+        if (review == null) {
+            return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_NOT_STARTED, "等待导师评审");
         }
-        return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_NOT_STARTED, "等待导师评审");
+        if ("PASS".equals(review.getResult())) {
+            return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_COMPLETED, "评审通过" + score);
+        }
+        return new StepStatus("DESIGN_REVIEW", "设计评审", STATUS_RETURNED,
+                "评审退回，请修改后重新评审" + score);
     }
 
     private Artifact latestArtifact(Long projectId, String type) {

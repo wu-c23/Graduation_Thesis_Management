@@ -23,9 +23,19 @@ http.interceptors.request.use((config) => {
 
 http.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
     const status = error.response?.status
-    const message = error.response?.data?.message || error.message || '网络请求失败'
+    let message = error.response?.data?.message
+    // 下载接口以 Blob 接收，出错时需要先读出 JSON 才能拿到后端提示。
+    if (!message && error.response?.data instanceof Blob) {
+      try {
+        const body = JSON.parse(await error.response.data.text())
+        message = body?.message
+      } catch {
+        message = ''
+      }
+    }
+    message = message || error.message || '网络请求失败'
     const isLoginRequest = String(error.config?.url || '').includes('/auth/login')
     if (status === 401 && !isLoginRequest) {
       clearSession()

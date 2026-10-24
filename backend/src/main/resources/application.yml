@@ -9,6 +9,10 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
   sql:
     init:
       mode: always
@@ -31,6 +35,10 @@ app:
     # 开发默认值仅用于本地演示；生产/答辩部署请通过 JWT_SECRET 环境变量覆盖。
     secret: ${JWT_SECRET:thesis-platform-dev-secret-key-2026-change-me}
     expiration-minutes: 480
+  upload:
+    # 后端默认从 backend/ 目录启动，因此指向项目根目录的 uploads/
+    dir: ${UPLOAD_DIR:../uploads}
+    max-size-bytes: 20971520
 
 logging:
   level:

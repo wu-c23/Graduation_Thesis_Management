@@ -14,6 +14,7 @@ public class Artifact {
     private Long projectId;
     private String type;
     private String filePath;
+    private String fileName;
     private String externalUrl;
     private String status;
     private Integer score;
@@ -51,6 +52,14 @@ public class Artifact {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getExternalUrl() {

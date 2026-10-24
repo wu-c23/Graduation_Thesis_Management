@@ -13,7 +13,7 @@
         </div>
         <div class="scaffold-note">
           <strong>学生与导师统一入口</strong>
-          <span>第 2 周已接入 JWT 登录与角色隔离，登录后按角色进入对应工作台。</span>
+          <span>第 3 周已打通材料提交、导师审核与设计评审闭环，登录后按角色进入对应工作台。</span>
         </div>
       </section>
 

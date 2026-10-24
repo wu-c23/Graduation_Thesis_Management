@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS artifact (
     project_id BIGINT NOT NULL,
     type VARCHAR(30) NOT NULL,
     file_path VARCHAR(255) NULL,
+    file_name VARCHAR(255) NULL,
     external_url VARCHAR(500) NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'SUBMITTED',
     score INT NULL,

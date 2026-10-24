@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS artifact (
     project_id BIGINT NOT NULL,
     type VARCHAR(30) NOT NULL,
     file_path VARCHAR(255),
+    file_name VARCHAR(255),
     external_url VARCHAR(500),
     status VARCHAR(20) NOT NULL DEFAULT 'SUBMITTED',
     score INT,
@@ -31,6 +32,9 @@ CREATE TABLE IF NOT EXISTS artifact (
     reviewed_at TIMESTAMP,
     CONSTRAINT fk_artifact_project FOREIGN KEY (project_id) REFERENCES project (id)
 );
+
+-- 兼容第 2 周已创建的文件库：补充材料原始文件名
+ALTER TABLE artifact ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);
 
 CREATE TABLE IF NOT EXISTS design_review (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

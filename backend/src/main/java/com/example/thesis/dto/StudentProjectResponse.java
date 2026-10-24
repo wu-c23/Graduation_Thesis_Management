@@ -10,6 +10,8 @@ public record StudentProjectResponse(
         int completedStepCount,
         int currentStep,
         boolean allCompleted,
-        List<StepStatus> steps
+        List<StepStatus> steps,
+        List<ArtifactView> artifacts,
+        List<DesignReviewView> designReviews
 ) {
 }
