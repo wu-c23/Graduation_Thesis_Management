@@ -12,16 +12,20 @@ import com.example.thesis.dto.WeeklyReportView;
 import com.example.thesis.entity.Artifact;
 import com.example.thesis.entity.DesignReview;
 import com.example.thesis.entity.Project;
+import com.example.thesis.entity.RepoBinding;
 import com.example.thesis.entity.User;
 import com.example.thesis.entity.WeeklyReport;
 import com.example.thesis.mapper.ArtifactMapper;
 import com.example.thesis.mapper.DesignReviewMapper;
 import com.example.thesis.mapper.ProjectMapper;
+import com.example.thesis.mapper.RepoBindingMapper;
 import com.example.thesis.mapper.UserMapper;
 import com.example.thesis.mapper.WeeklyReportMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,6 +55,7 @@ public class ProjectProgressService {
     private final ArtifactMapper artifactMapper;
     private final DesignReviewMapper designReviewMapper;
     private final WeeklyReportMapper weeklyReportMapper;
+    private final RepoBindingMapper repoBindingMapper;
     private final ArtifactService artifactService;
     private final DesignReviewService designReviewService;
     private final WeeklyReportService weeklyReportService;
@@ -62,6 +67,7 @@ public class ProjectProgressService {
             ArtifactMapper artifactMapper,
             DesignReviewMapper designReviewMapper,
             WeeklyReportMapper weeklyReportMapper,
+            RepoBindingMapper repoBindingMapper,
             ArtifactService artifactService,
             DesignReviewService designReviewService,
             WeeklyReportService weeklyReportService,
@@ -72,6 +78,7 @@ public class ProjectProgressService {
         this.artifactMapper = artifactMapper;
         this.designReviewMapper = designReviewMapper;
         this.weeklyReportMapper = weeklyReportMapper;
+        this.repoBindingMapper = repoBindingMapper;
         this.artifactService = artifactService;
         this.designReviewService = designReviewService;
         this.weeklyReportService = weeklyReportService;
@@ -93,7 +100,7 @@ public class ProjectProgressService {
                 .eq(Project::getAdvisorId, advisorId)
                 .orderByAsc(Project::getId));
         if (projects.isEmpty()) {
-            return new AdvisorStudentsResponse(0, 0, 0, List.of());
+            return new AdvisorStudentsResponse(0, 0, 0, 0, 0, 0, List.of());
         }
 
         Set<Long> studentIds = projects.stream()
@@ -103,28 +110,58 @@ public class ProjectProgressService {
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         List<Long> projectIds = projects.stream().map(Project::getId).toList();
-        List<Artifact> submittedArtifacts = artifactMapper.selectList(new LambdaQueryWrapper<Artifact>()
-                .in(Artifact::getProjectId, projectIds)
-                .eq(Artifact::getStatus, "SUBMITTED"));
-        Map<Long, Long> pendingByProject = submittedArtifacts.stream()
-                .collect(Collectors.groupingBy(Artifact::getProjectId, Collectors.counting()));
-
-        List<WeeklyReport> submittedWeeklyReports = weeklyReportMapper.selectList(
+        List<Artifact> allArtifacts = artifactMapper.selectList(new LambdaQueryWrapper<Artifact>()
+                .in(Artifact::getProjectId, projectIds));
+        List<WeeklyReport> allWeeklyReports = weeklyReportMapper.selectList(
                 new LambdaQueryWrapper<WeeklyReport>()
-                        .in(WeeklyReport::getProjectId, projectIds)
-                        .eq(WeeklyReport::getStatus, WeeklyReportService.STATUS_SUBMITTED));
-        Map<Long, Long> pendingWeeklyByProject = submittedWeeklyReports.stream()
+                        .in(WeeklyReport::getProjectId, projectIds));
+        List<DesignReview> allDesignReviews = designReviewMapper.selectList(
+                new LambdaQueryWrapper<DesignReview>()
+                        .in(DesignReview::getProjectId, projectIds));
+        List<RepoBinding> allBindings = repoBindingMapper.selectList(
+                new LambdaQueryWrapper<RepoBinding>()
+                        .in(RepoBinding::getProjectId, projectIds));
+
+        Map<Long, Long> pendingByProject = allArtifacts.stream()
+                .filter(artifact -> ArtifactService.STATUS_SUBMITTED.equals(artifact.getStatus()))
+                .collect(Collectors.groupingBy(Artifact::getProjectId, Collectors.counting()));
+        Map<Long, Long> pendingWeeklyByProject = allWeeklyReports.stream()
+                .filter(report -> WeeklyReportService.STATUS_SUBMITTED.equals(report.getStatus()))
                 .collect(Collectors.groupingBy(WeeklyReport::getProjectId, Collectors.counting()));
 
+        // 最近动态取材料提交、周报提交、设计评审、仓库同步四类时间中的最大值。
+        Map<Long, LocalDateTime> lastActiveByProject = new HashMap<>();
+        allArtifacts.forEach(artifact -> mergeLastActive(
+                lastActiveByProject, artifact.getProjectId(), artifact.getSubmittedAt()));
+        allWeeklyReports.forEach(report -> mergeLastActive(
+                lastActiveByProject, report.getProjectId(), report.getSubmittedAt()));
+        allDesignReviews.forEach(review -> mergeLastActive(
+                lastActiveByProject, review.getProjectId(), review.getReviewedAt()));
+        allBindings.forEach(binding -> mergeLastActive(
+                lastActiveByProject, binding.getProjectId(), binding.getLastSyncAt()));
+
         List<AdvisorStudentView> views = new ArrayList<>();
+        int completedStudents = 0;
+        int pendingStudents = 0;
+        int totalCompletedSteps = 0;
         for (Project project : projects) {
             List<StepStatus> steps = buildSteps(project.getId());
             int completed = completedStepCount(steps);
             int current = currentStep(steps);
             boolean allCompleted = completed == steps.size();
+            long pending = pendingByProject.getOrDefault(project.getId(), 0L)
+                    + pendingWeeklyByProject.getOrDefault(project.getId(), 0L);
             User student = students.get(project.getStudentId());
             String currentStage = allCompleted ? "全部完成" : steps.get(current - 1).title();
             String currentStatus = allCompleted ? STATUS_COMPLETED : steps.get(current - 1).status();
+
+            if (allCompleted) {
+                completedStudents++;
+            }
+            if (pending > 0) {
+                pendingStudents++;
+            }
+            totalCompletedSteps += completed;
 
             views.add(new AdvisorStudentView(
                     project.getId(),
@@ -136,15 +173,28 @@ public class ProjectProgressService {
                     current,
                     currentStage,
                     currentStatus,
-                    pendingByProject.getOrDefault(project.getId(), 0L)
-                            + pendingWeeklyByProject.getOrDefault(project.getId(), 0L)
+                    pending,
+                    lastActiveByProject.get(project.getId()),
+                    steps
             ));
         }
 
+        long pendingArtifactCount = allArtifacts.stream()
+                .filter(artifact -> ArtifactService.STATUS_SUBMITTED.equals(artifact.getStatus()))
+                .count();
+        long pendingWeeklyCount = allWeeklyReports.stream()
+                .filter(report -> WeeklyReportService.STATUS_SUBMITTED.equals(report.getStatus()))
+                .count();
+        int averageCompletionRate = (int) Math.round(
+                totalCompletedSteps * 100.0 / (views.size() * 6.0));
+
         return new AdvisorStudentsResponse(
                 views.size(),
-                submittedArtifacts.size(),
-                submittedWeeklyReports.size(),
+                pendingArtifactCount,
+                pendingWeeklyCount,
+                completedStudents,
+                pendingStudents,
+                averageCompletionRate,
                 views
         );
     }
@@ -322,5 +372,16 @@ public class ProjectProgressService {
             }
         }
         return steps.size();
+    }
+
+    private void mergeLastActive(
+            Map<Long, LocalDateTime> target,
+            Long projectId,
+            LocalDateTime candidate
+    ) {
+        if (candidate == null) {
+            return;
+        }
+        target.merge(projectId, candidate, (left, right) -> left.isAfter(right) ? left : right);
     }
 }

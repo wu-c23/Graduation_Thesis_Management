@@ -13,7 +13,7 @@
         </div>
         <div class="scaffold-note">
           <strong>学生与导师统一入口</strong>
-          <span>第 4 周已打通周报批阅、代码仓库同步与测试报告审核，六步进度全部接入真实数据。</span>
+          <span>第 5–6 周完成导师总览、全链路联调与交付文档；六步流程与角色隔离均已验证。</span>
         </div>
       </section>
 

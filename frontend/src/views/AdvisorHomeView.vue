@@ -28,59 +28,115 @@
       type="info"
       :closable="false"
       show-icon
-      title="第 4 周已开放周报批阅与测试报告审核；学生绑定公开仓库后可自动同步提交统计。"
+      title="导师总览实时汇总进度矩阵、完成率与待办；材料、周报、设计评审与仓库信息均来自真实业务数据。"
     />
 
     <el-row :gutter="16" class="stats-row">
-      <el-col :xs="24" :sm="8">
+      <el-col :xs="24" :sm="12" :lg="6">
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">名下学生</div>
           <div class="stat-value">{{ summary?.studentCount ?? 0 }}</div>
-          <div class="stat-hint">仅统计当前导师名下</div>
+          <div class="stat-hint">
+            {{ summary?.completedStudentCount ?? 0 }} 人已完成六步
+          </div>
         </el-card>
       </el-col>
-      <el-col :xs="24" :sm="8">
+      <el-col :xs="24" :sm="12" :lg="6">
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">待审核材料</div>
           <div class="stat-value">{{ summary?.pendingArtifactCount ?? 0 }}</div>
-          <div class="stat-hint">点击学生详情即可审核</div>
+          <div class="stat-hint">含需求、原型与测试报告</div>
         </el-card>
       </el-col>
-      <el-col :xs="24" :sm="8">
+      <el-col :xs="24" :sm="12" :lg="6">
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">待批阅周报</div>
           <div class="stat-value">{{ summary?.pendingWeeklyReportCount ?? 0 }}</div>
-          <div class="stat-hint">在周报批阅区直接处理</div>
+          <div class="stat-hint">{{ summary?.pendingStudentCount ?? 0 }} 名学生有待办</div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-label">平均完成率</div>
+          <div class="stat-value">{{ summary?.averageCompletionRate ?? 0 }}%</div>
+          <el-progress
+            :percentage="summary?.averageCompletionRate ?? 0"
+            :stroke-width="6"
+            :show-text="false"
+          />
         </el-card>
       </el-col>
     </el-row>
 
     <el-card class="section-card" shadow="never">
       <template #header>
-        <div class="card-title">学生进度</div>
+        <div class="overview-header">
+          <span class="card-title">学生进度总览</span>
+          <div class="overview-tools">
+            <el-input
+              v-model="keyword"
+              clearable
+              placeholder="搜索学生或课题"
+              class="search-input"
+            />
+            <el-select v-model="filterStatus" class="filter-select">
+              <el-option label="全部学生" value="ALL" />
+              <el-option label="有待办" value="PENDING" />
+              <el-option label="进行中" value="IN_PROGRESS" />
+              <el-option label="已完成六步" value="COMPLETED" />
+            </el-select>
+            <el-select v-model="sortMode" class="filter-select">
+              <el-option label="默认顺序" value="DEFAULT" />
+              <el-option label="进度从高到低" value="PROGRESS_DESC" />
+              <el-option label="待办从多到少" value="PENDING_DESC" />
+            </el-select>
+          </div>
+        </div>
       </template>
 
-      <el-table :data="students" stripe>
-        <el-table-column prop="studentName" label="学生" width="110" />
-        <el-table-column prop="username" label="学号" width="120" />
-        <el-table-column prop="title" label="课题" />
-        <el-table-column prop="currentStage" label="当前阶段" width="130">
+      <el-table :data="filteredStudents" stripe>
+        <el-table-column prop="studentName" label="学生" width="96" />
+        <el-table-column prop="username" label="学号" width="104" />
+        <el-table-column prop="title" label="课题" min-width="180" show-overflow-tooltip />
+        <el-table-column label="六步进度" width="158">
+          <template #default="{ row }">
+            <div class="step-dots">
+              <span
+                v-for="step in row.steps"
+                :key="step.key"
+                class="step-dot"
+                :class="stepStatusMeta(step.status).tag"
+                :title="`${step.title}：${stepStatusMeta(step.status).label}`"
+              />
+            </div>
+            <el-progress
+              :percentage="progressPercent(row)"
+              :stroke-width="6"
+              :show-text="false"
+              class="row-progress"
+            />
+            <span class="small muted">{{ row.completedStepCount }} / 6 步</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="currentStage" label="当前阶段" width="126">
           <template #default="{ row }">
             <el-tag :type="stageTagType(row.currentStepStatus)" effect="plain">
               {{ row.currentStage }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="已通过步骤" width="110">
-          <template #default="{ row }">{{ row.completedStepCount }} / 6</template>
-        </el-table-column>
-        <el-table-column label="待处理" width="90">
+        <el-table-column label="待处理" width="84">
           <template #default="{ row }">
             <el-badge v-if="row.pendingCount > 0" :value="row.pendingCount" type="warning" />
             <span v-else class="muted">0</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="130">
+        <el-table-column label="最近动态" width="140">
+          <template #default="{ row }">
+            <span class="small">{{ formatDateTime(row.lastActiveAt) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="110">
           <template #default="{ row }">
             <el-button size="small" @click="openDetail(row)">查看详情</el-button>
           </template>
@@ -88,10 +144,13 @@
       </el-table>
 
       <el-empty
-        v-if="!loading && students.length === 0 && !loadError"
-        description="名下暂无学生"
+        v-if="!loading && filteredStudents.length === 0 && !loadError"
+        :description="students.length === 0 ? '名下暂无学生' : '没有符合筛选条件的学生'"
       />
-      <p class="tab-note">导师只能查看自己名下的学生；材料、周报与设计评审操作均会校验课题归属。</p>
+      <p class="tab-note">
+        进度矩阵按六步顺序展示；“最近动态”取材料提交、周报提交、设计评审与仓库同步中的最新时间。
+        导师只能查看自己名下的学生。
+      </p>
     </el-card>
 
     <el-drawer v-model="drawerVisible" title="学生进度详情" size="760px">
@@ -458,6 +517,30 @@ const weeklyForm = reactive({ comment: '' })
 const weeklySubmitting = ref(false)
 
 const students = computed(() => summary.value?.students || [])
+const keyword = ref('')
+const filterStatus = ref('ALL')
+const sortMode = ref('DEFAULT')
+
+const filteredStudents = computed(() => {
+  const query = keyword.value.trim().toLowerCase()
+  let rows = students.value.filter((row) => {
+    if (query) {
+      const text = `${row.studentName} ${row.username} ${row.title}`.toLowerCase()
+      if (!text.includes(query)) return false
+    }
+    if (filterStatus.value === 'PENDING') return row.pendingCount > 0
+    if (filterStatus.value === 'COMPLETED') return row.completedStepCount === 6
+    if (filterStatus.value === 'IN_PROGRESS') return row.completedStepCount < 6
+    return true
+  })
+  rows = [...rows]
+  if (sortMode.value === 'PROGRESS_DESC') {
+    rows.sort((left, right) => right.completedStepCount - left.completedStepCount)
+  } else if (sortMode.value === 'PENDING_DESC') {
+    rows.sort((left, right) => right.pendingCount - left.pendingCount)
+  }
+  return rows
+})
 
 const materialsApproved = computed(() => {
   const artifacts = detail.value?.artifacts || []
@@ -468,6 +551,10 @@ const materialsApproved = computed(() => {
 
 function stageTagType(status) {
   return stepStatusMeta(status).tag
+}
+
+function progressPercent(row) {
+  return Math.round((row.completedStepCount || 0) / 6 * 100)
 }
 
 function artifactSourceLabel(row) {
@@ -684,6 +771,10 @@ onMounted(loadStudents)
   color: #1f2d3d;
 }
 
+.stat-card :deep(.el-progress) {
+  margin-top: 6px;
+}
+
 .stat-hint {
   color: #9aa6b6;
   font-size: 12px;
@@ -691,6 +782,62 @@ onMounted(loadStudents)
 
 .card-title {
   font-weight: 650;
+}
+
+.overview-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.overview-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-input {
+  width: 210px;
+}
+
+.filter-select {
+  width: 150px;
+}
+
+.step-dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.step-dot {
+  width: 11px;
+  height: 11px;
+  background: #dcdfe6;
+  border-radius: 50%;
+}
+
+.step-dot.success {
+  background: #67c23a;
+}
+
+.step-dot.warning {
+  background: #e6a23c;
+}
+
+.step-dot.danger {
+  background: #f56c6c;
+}
+
+.step-dot.info {
+  background: #c0c4cc;
+}
+
+.row-progress {
+  width: 118px;
+  margin-bottom: 3px;
 }
 
 .tab-note {

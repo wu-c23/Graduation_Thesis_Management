@@ -6,6 +6,9 @@ public record AdvisorStudentsResponse(
         int studentCount,
         long pendingArtifactCount,
         long pendingWeeklyReportCount,
+        int completedStudentCount,
+        int pendingStudentCount,
+        int averageCompletionRate,
         List<AdvisorStudentView> students
 ) {
 }
